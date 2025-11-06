@@ -18,44 +18,29 @@
         const userAgent = navigator.userAgent || navigator.vendor || window.opera;
         const isAndroid = /android/i.test(userAgent);
         const isIOS = /iphone|ipad|ipod/i.test(userAgent);
-        const isMobile = isAndroid || isIOS;
-        const isFacebookUA = /\bFBAN|FBAV|FB_IAB|FBDV|FBMD|FBSN|FBSV|Messenger/i.test(userAgent);
-        const referrer = document.referrer || '';
-        const isFacebookReferrer = /(^https?:\/\/)?([^\/]+\.)?facebook\.com/i.test(referrer);
-        const isFacebookPlatform = isFacebookUA || isFacebookReferrer;
         const statusEl = document.getElementById('status');
         const hintEl = document.getElementById('hint');
         const buttonEl = document.getElementById('join-btn');
-        const spinnerEl = document.querySelector('.spinner');
 
-        if (isFacebookPlatform) {
-          statusEl.textContent = 'Đang mở ứng dụng Facebook...';
-          hintEl.innerHTML = 'Nếu ứng dụng không tự mở, hãy nhấn nút <strong>Tham gia nhóm</strong> bên dưới.';
-          buttonEl.classList.add('visible');
+        statusEl.textContent = 'Đang mở ứng dụng Facebook...';
+        hintEl.innerHTML = 'Nếu ứng dụng không tự mở, hãy nhấn nút <strong>Tham gia nhóm</strong> bên dưới.';
+        buttonEl.classList.add('visible');
 
-          if (isMobile) {
-            const timeout = setTimeout(function () {
-              window.location.href = fallbackUrl;
-            }, 1200);
-
-            const visibilityHandler = function () {
-              if (document.hidden) {
-                clearTimeout(timeout);
-              }
-            };
-
-            document.addEventListener('visibilitychange', visibilityHandler);
-            window.location.replace(deepLink);
-          } else {
+        if (isAndroid || isIOS) {
+          const timeout = setTimeout(function () {
             window.location.href = fallbackUrl;
-          }
+          }, 1200);
+
+          const visibilityHandler = function () {
+            if (document.hidden) {
+              clearTimeout(timeout);
+            }
+          };
+
+          document.addEventListener('visibilitychange', visibilityHandler);
+          window.location.replace(deepLink);
         } else {
-          if (spinnerEl) {
-            spinnerEl.setAttribute('hidden', 'hidden');
-          }
-          statusEl.textContent = 'Nhấn nút bên dưới để mở nhóm Facebook.';
-          hintEl.textContent = 'Trang chỉ tự động chuyển tiếp khi bạn đang ở trong Facebook.';
-          buttonEl.classList.add('visible');
+          window.location.href = fallbackUrl;
         }
       })();
     </script>
@@ -107,7 +92,7 @@
         }
       }
       .cta {
-        display: none;
+        display: inline-block;
         margin-top: 22px;
         padding: 12px 20px;
         background: #1877f2;
@@ -120,12 +105,6 @@
       .cta:hover,
       .cta:focus-visible {
         background: #0f6ae0;
-      }
-      .cta.visible {
-        display: inline-block;
-      }
-      .spinner[hidden] {
-        display: none !important;
       }
     </style>
   </head>
