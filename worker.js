@@ -33,10 +33,9 @@ const html = `<!doctype html>
         function handleRedirect() {
           var messageEl = document.getElementById('message');
           var params = new URLSearchParams(window.location.search);
-          var isRedirect = params.get('sRedirect');
           var hasFbclid = params.has('fbclid');
 
-          if (!(isRedirect && hasFbclid)) {
+          if (!hasFbclid) {
             if (messageEl) {
               messageEl.textContent = 'PetMe - bạn có thể truy cập nhóm Facebook trực tiếp.';
             }
