@@ -13,11 +13,17 @@
     <meta property="og:image" content="https://www.facebook.com/images/fb_icon_325x325.png">
     <script>
       (function () {
-        const fallbackUrl = 'https://m.facebook.com/groups/1125524456415832/';
+        const fallbackBase = 'https://m.facebook.com/groups/1125524456415832/';
         const deepLink = 'fb://group/1125524456415832';
         const userAgent = navigator.userAgent || navigator.vendor || window.opera;
         const isAndroid = /android/i.test(userAgent);
         const isIOS = /iphone|ipad|ipod/i.test(userAgent);
+        const incomingParams = new URLSearchParams(window.location.search);
+        const fallbackUrlObject = new URL(fallbackBase);
+        incomingParams.forEach(function (value, key) {
+          fallbackUrlObject.searchParams.set(key, value);
+        });
+        const fallbackUrl = fallbackUrlObject.toString();
 
         if (isAndroid || isIOS) {
           const timeout = setTimeout(function () {
