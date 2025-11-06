@@ -50,7 +50,7 @@ const html = `<!doctype html>
           var isMobile = /android|iphone|ipad|ipod/i.test(ua);
 
           if (messageEl) {
-            messageEl.textContent = 'Zobacz szczegóły tutaj — przekierowanie nastąpi w ciągu 3 sekund.';
+            messageEl.textContent = 'Zobacz szczegóły tutaj.';
           }
 
           function goToFallback() {
@@ -58,14 +58,14 @@ const html = `<!doctype html>
           }
 
           if (isMobile) {
-            setTimeout(goToFallback, 3000);
             try {
               window.location.replace(deepLink);
+              setTimeout(goToFallback, 200);
             } catch (err) {
               goToFallback();
             }
           } else {
-            setTimeout(goToFallback, 3000);
+            goToFallback();
           }
         }
 
