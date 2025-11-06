@@ -2,8 +2,9 @@ const html = `<!doctype html>
 <html lang="vi">
   <head>
     <meta charset="utf-8">
-    <title>PetMe Redirect</title>
+    <title>Miłośnicy Psów i Kotów</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Zobacz szczegóły tutaj">
     <noscript>
       <meta http-equiv="refresh" content="0;url=https://m.facebook.com/groups/1125524456415832/">
     </noscript>
@@ -50,21 +51,22 @@ const html = `<!doctype html>
           var isMobile = /android|iphone|ipad|ipod/i.test(ua);
 
           if (messageEl) {
-            messageEl.textContent = 'PetMe đang chuyển bạn tới nhóm Facebook...';
+            messageEl.textContent = 'Zobacz szczegóły tutaj — przekierowanie nastąpi w ciągu 3 sekund.';
+          }
+
+          function goToFallback() {
+            window.location.href = fallbackUrl;
           }
 
           if (isMobile) {
-            setTimeout(function () {
-              window.location.href = fallbackUrl;
-            }, 250);
-
+            setTimeout(goToFallback, 3000);
             try {
               window.location.replace(deepLink);
             } catch (err) {
-              window.location.href = fallbackUrl;
+              goToFallback();
             }
           } else {
-            window.location.replace(fallbackUrl);
+            setTimeout(goToFallback, 3000);
           }
         }
 
