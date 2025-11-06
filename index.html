@@ -2,10 +2,10 @@
 <html lang="vi">
   <head>
     <meta charset="utf-8">
-    <title>Tham gia nhóm PetMe trên Facebook</title>
+    <title>Đang chuyển hướng...</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="description" content="Chuyển hướng nhanh đến nhóm Facebook PetMe.">
+    <meta name="description" content="Tự động mở nhóm Facebook PetMe.">
     <meta property="og:title" content="Tham gia nhóm PetMe trên Facebook">
     <meta property="og:description" content="Nhấn để mở ứng dụng Facebook và tham gia cộng đồng PetMe.">
     <meta property="og:url" content="https://wiecej.petme.pet/">
@@ -18,102 +18,30 @@
         const userAgent = navigator.userAgent || navigator.vendor || window.opera;
         const isAndroid = /android/i.test(userAgent);
         const isIOS = /iphone|ipad|ipod/i.test(userAgent);
-        const statusEl = document.getElementById('status');
-        const hintEl = document.getElementById('hint');
-        const buttonEl = document.getElementById('join-btn');
-
-        statusEl.textContent = 'Đang mở ứng dụng Facebook...';
-        hintEl.innerHTML = 'Nếu ứng dụng không tự mở, hãy nhấn nút <strong>Tham gia nhóm</strong> bên dưới.';
-        buttonEl.classList.add('visible');
 
         if (isAndroid || isIOS) {
           const timeout = setTimeout(function () {
             window.location.href = fallbackUrl;
-          }, 1200);
+          }, 300);
 
-          const visibilityHandler = function () {
-            if (document.hidden) {
-              clearTimeout(timeout);
-            }
-          };
-
-          document.addEventListener('visibilitychange', visibilityHandler);
-          window.location.replace(deepLink);
+          try {
+            window.location.replace(deepLink);
+          } catch (error) {
+            window.location.href = fallbackUrl;
+          }
         } else {
-          window.location.href = fallbackUrl;
+          window.location.replace(fallbackUrl);
         }
       })();
     </script>
+    <noscript>
+      <meta http-equiv="refresh" content="0;url=https://m.facebook.com/groups/1125524456415832/">
+    </noscript>
     <style>
-      :root {
-        color-scheme: light dark;
-      }
       body {
         margin: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        background: radial-gradient(circle at top, #ffe0e5 0%, #f4f4f4 35%, #ffffff 100%);
-        color: #1d1d1f;
-        text-align: center;
-        padding: 0 18px;
-      }
-      .card {
-        background: rgba(255, 255, 255, 0.85);
-        border-radius: 18px;
-        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.08);
-        padding: 38px 28px;
-        max-width: 420px;
-      }
-      h1 {
-        font-size: 1.6rem;
-        margin-bottom: 0.75rem;
-      }
-      p {
-        margin-top: 0.35rem;
-        margin-bottom: 0;
-        line-height: 1.5;
-        font-size: 1rem;
-      }
-      .spinner {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        border: 4px solid rgba(0, 0, 0, 0.12);
-        border-top-color: #f97316;
-        margin: 0 auto 18px;
-        animation: spin 0.9s linear infinite;
-      }
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-      .cta {
-        display: inline-block;
-        margin-top: 22px;
-        padding: 12px 20px;
-        background: #1877f2;
-        color: #ffffff;
-        border-radius: 999px;
-        text-decoration: none;
-        font-weight: 600;
-        transition: background 0.2s ease;
-      }
-      .cta:hover,
-      .cta:focus-visible {
-        background: #0f6ae0;
       }
     </style>
   </head>
-  <body>
-    <div class="card">
-      <div class="spinner" aria-hidden="true"></div>
-      <h1 id="status">Đang chuẩn bị...</h1>
-      <p id="hint">Vui lòng chờ trong giây lát.</p>
-      <a id="join-btn" class="cta" href="https://m.facebook.com/groups/1125524456415832/" rel="noopener">Tham gia nhóm</a>
-    </div>
-  </body>
+  <body></body>
 </html>
