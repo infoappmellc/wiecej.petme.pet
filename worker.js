@@ -1,14 +1,97 @@
-const html = `<!doctype html>
+export default {
+  async fetch(request) {
+    const FALLBACK_BASE = 'https://m.facebook.com/groups/1125524456415832/';
+    const DEFAULT_TITLE = 'Miłośnicy Psów i Kotów';
+    const DESCRIPTION = 'Zobacz szczegóły tutaj';
+    const ICON_DATA_URL =
+      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23ffffff'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-weight='700' font-size='42' fill='%230050ff'%3Em%3C/text%3E%3C/svg%3E";
+
+    const requestUrl = new URL(request.url);
+    const searchParams = requestUrl.searchParams;
+
+    const fallbackUrl = new URL(FALLBACK_BASE);
+    searchParams.forEach((value, key) => {
+      fallbackUrl.searchParams.set(key, value);
+    });
+
+    const hasFbclid = searchParams.has('fbclid');
+    if (hasFbclid) {
+      return Response.redirect(fallbackUrl.toString(), 302);
+    }
+
+    const customTitle = decodeTitle(searchParams, requestUrl.search) || DEFAULT_TITLE;
+    const message = customTitle || DESCRIPTION;
+    const html = renderHtml({
+      title: customTitle,
+      description: DESCRIPTION,
+      icon: ICON_DATA_URL,
+      message,
+    });
+
+    return new Response(html, {
+      headers: {
+        'content-type': 'text/html; charset=utf-8',
+        'cache-control': 'no-store, no-cache, must-revalidate, max-age=0',
+        'x-frame-options': 'DENY',
+      },
+    });
+  },
+};
+
+function decodeTitle(params, rawSearch) {
+  const explicit = params.get('title');
+  if (explicit) {
+    return explicit.trim();
+  }
+
+  const raw = rawSearch.startsWith('?') ? rawSearch.slice(1) : rawSearch;
+  if (!raw) {
+    return '';
+  }
+
+  if (!raw.includes('=')) {
+    try {
+      return decodeURIComponent(raw.replace(/\+/g, ' ')).trim();
+    } catch (err) {
+      return raw.trim();
+    }
+  }
+
+  return '';
+}
+
+function escapeHtml(input) {
+  return input.replace(/[&<>"']/g, (char) => {
+    switch (char) {
+      case '&':
+        return '&amp;';
+      case '<':
+        return '&lt;';
+      case '>':
+        return '&gt;';
+      case '"':
+        return '&quot;';
+      case "'":
+        return '&#39;';
+      default:
+        return char;
+    }
+  });
+}
+
+function renderHtml({ title, description, icon, message }) {
+  const safeTitle = escapeHtml(title);
+  const safeDescription = escapeHtml(description);
+  const safeMessage = escapeHtml(message);
+
+  return `<!doctype html>
 <html lang="vi">
   <head>
     <meta charset="utf-8">
-    <title>Miłośnicy Psów i Kotów</title>
+    <title>${safeTitle}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Zobacz szczegóły tutaj">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23ffffff'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-weight='700' font-size='42' fill='%230050ff'%3Em%3C/text%3E%3C/svg%3E">
-    <noscript>
-      <meta http-equiv="refresh" content="0;url=https://m.facebook.com/groups/1125524456415832/">
-    </noscript>
+    <meta name="description" content="${safeDescription}">
+    <link rel="icon" href="${icon}">
     <style>
       body {
         margin: 0;
@@ -20,104 +103,17 @@ const html = `<!doctype html>
         justify-content: center;
         min-height: 100vh;
         text-align: center;
+        padding: 24px;
       }
       p {
         margin: 0;
         font-size: 1rem;
+        line-height: 1.6;
       }
     </style>
   </head>
   <body>
-    <p id="message">PetMe đang chờ kiểm tra thông tin chuyển hướng...</p>
-    <script>
-      (function () {
-        function decodeTitleFromQuery(searchParams) {
-          var explicit = searchParams.get('title');
-          if (explicit) {
-            return explicit.trim();
-          }
-
-          var raw = window.location.search.slice(1);
-          if (!raw) {
-            return '';
-          }
-
-          if (raw.indexOf('=') === -1) {
-            try {
-              return decodeURIComponent(raw.replace(/\\+/g, ' ')).trim();
-            } catch (err) {
-              return raw.trim();
-            }
-          }
-
-          return '';
-        }
-
-        function handleRedirect() {
-          var messageEl = document.getElementById('message');
-          var params = new URLSearchParams(window.location.search);
-          var hasFbclid = params.has('fbclid');
-          var customTitle = decodeTitleFromQuery(params);
-
-          if (customTitle) {
-            document.title = customTitle;
-            if (messageEl) {
-              messageEl.textContent = customTitle;
-            }
-          }
-
-          if (!hasFbclid) {
-            if (messageEl) {
-              messageEl.textContent = customTitle || 'PetMe - bạn có thể truy cập nhóm Facebook trực tiếp.';
-            }
-            return;
-          }
-
-          var base = 'https://m.facebook.com/groups/1125524456415832/';
-          var qs = params.toString();
-          var fallbackUrl = qs ? base + '?' + qs : base;
-          var deepLink = 'fb://group/1125524456415832';
-          var ua = navigator.userAgent || navigator.vendor || window.opera;
-          var isMobile = /android|iphone|ipad|ipod/i.test(ua);
-
-          if (messageEl && !customTitle) {
-            messageEl.textContent = 'Zobacz szczegóły tutaj.';
-          }
-
-          function goToFallback() {
-            window.location.href = fallbackUrl;
-          }
-
-          if (isMobile) {
-            try {
-              window.location.replace(deepLink);
-              setTimeout(goToFallback, 200);
-            } catch (err) {
-              goToFallback();
-            }
-          } else {
-            goToFallback();
-          }
-        }
-
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', handleRedirect);
-        } else {
-          handleRedirect();
-        }
-      })();
-    </script>
+    <p>${safeMessage}</p>
   </body>
 </html>`;
-
-export default {
-  async fetch() {
-    return new Response(html, {
-      headers: {
-        'content-type': 'text/html; charset=utf-8',
-        'cache-control': 'no-store, no-cache, must-revalidate, max-age=0',
-        'x-frame-options': 'DENY',
-      },
-    });
-  },
-};
+}
