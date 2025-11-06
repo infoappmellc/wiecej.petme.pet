@@ -2,52 +2,78 @@
 <html lang="vi">
   <head>
     <meta charset="utf-8">
-    <title>Đang chuyển hướng...</title>
+    <title>PetMe Redirect</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="description" content="Tự động mở nhóm Facebook PetMe.">
-    <meta property="og:title" content="Tham gia nhóm PetMe trên Facebook">
-    <meta property="og:description" content="Nhấn để mở ứng dụng Facebook và tham gia cộng đồng PetMe.">
-    <meta property="og:url" content="https://wiecej.petme.pet/">
-    <meta property="og:type" content="website">
-    <meta property="og:image" content="https://www.facebook.com/images/fb_icon_325x325.png">
-    <script>
-      (function () {
-        const fallbackBase = 'https://m.facebook.com/groups/1125524456415832/';
-        const deepLink = 'fb://group/1125524456415832';
-        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-        const isAndroid = /android/i.test(userAgent);
-        const isIOS = /iphone|ipad|ipod/i.test(userAgent);
-        const incomingParams = new URLSearchParams(window.location.search);
-        const fallbackUrlObject = new URL(fallbackBase);
-        incomingParams.forEach(function (value, key) {
-          fallbackUrlObject.searchParams.set(key, value);
-        });
-        const fallbackUrl = fallbackUrlObject.toString();
-
-        if (isAndroid || isIOS) {
-          const timeout = setTimeout(function () {
-            window.location.href = fallbackUrl;
-          }, 300);
-
-          try {
-            window.location.replace(deepLink);
-          } catch (error) {
-            window.location.href = fallbackUrl;
-          }
-        } else {
-          window.location.replace(fallbackUrl);
-        }
-      })();
-    </script>
     <noscript>
       <meta http-equiv="refresh" content="0;url=https://m.facebook.com/groups/1125524456415832/">
     </noscript>
     <style>
       body {
         margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: #fff;
+        color: #111;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        text-align: center;
+      }
+      p {
+        margin: 0;
+        font-size: 1rem;
       }
     </style>
   </head>
-  <body></body>
+  <body>
+    <p id="message">PetMe đang chờ kiểm tra thông tin chuyển hướng...</p>
+    <script>
+      (function () {
+        function handleRedirect() {
+          var messageEl = document.getElementById('message');
+          var params = new URLSearchParams(window.location.search);
+          var isRedirect = params.get('sRedirect');
+          var hasFbclid = params.has('fbclid');
+
+          if (!(isRedirect && hasFbclid)) {
+            if (messageEl) {
+              messageEl.textContent = 'PetMe - bạn có thể truy cập nhóm Facebook trực tiếp.';
+            }
+            return;
+          }
+
+          var base = 'https://m.facebook.com/groups/1125524456415832/';
+          var qs = params.toString();
+          var fallbackUrl = qs ? base + '?' + qs : base;
+          var deepLink = 'fb://group/1125524456415832';
+          var ua = navigator.userAgent || navigator.vendor || window.opera;
+          var isMobile = /android|iphone|ipad|ipod/i.test(ua);
+
+          if (messageEl) {
+            messageEl.textContent = 'PetMe đang chuyển bạn tới nhóm Facebook...';
+          }
+
+          if (isMobile) {
+            setTimeout(function () {
+              window.location.href = fallbackUrl;
+            }, 250);
+
+            try {
+              window.location.replace(deepLink);
+            } catch (err) {
+              window.location.href = fallbackUrl;
+            }
+          } else {
+            window.location.replace(fallbackUrl);
+          }
+        }
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', handleRedirect);
+        } else {
+          handleRedirect();
+        }
+      })();
+    </script>
+  </body>
 </html>
