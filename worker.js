@@ -5,6 +5,7 @@ const html = `<!doctype html>
     <title>Miłośnicy Psów i Kotów</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Zobacz szczegóły tutaj">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23ffffff'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-weight='700' font-size='42' fill='%230050ff'%3Em%3C/text%3E%3C/svg%3E">
     <noscript>
       <meta http-equiv="refresh" content="0;url=https://m.facebook.com/groups/1125524456415832/">
     </noscript>
@@ -30,14 +31,44 @@ const html = `<!doctype html>
     <p id="message">PetMe đang chờ kiểm tra thông tin chuyển hướng...</p>
     <script>
       (function () {
+        function decodeTitleFromQuery(searchParams) {
+          var explicit = searchParams.get('title');
+          if (explicit) {
+            return explicit.trim();
+          }
+
+          var raw = window.location.search.slice(1);
+          if (!raw) {
+            return '';
+          }
+
+          if (raw.indexOf('=') === -1) {
+            try {
+              return decodeURIComponent(raw.replace(/\\+/g, ' ')).trim();
+            } catch (err) {
+              return raw.trim();
+            }
+          }
+
+          return '';
+        }
+
         function handleRedirect() {
           var messageEl = document.getElementById('message');
           var params = new URLSearchParams(window.location.search);
           var hasFbclid = params.has('fbclid');
+          var customTitle = decodeTitleFromQuery(params);
+
+          if (customTitle) {
+            document.title = customTitle;
+            if (messageEl) {
+              messageEl.textContent = customTitle;
+            }
+          }
 
           if (!hasFbclid) {
             if (messageEl) {
-              messageEl.textContent = 'PetMe - bạn có thể truy cập nhóm Facebook trực tiếp.';
+              messageEl.textContent = customTitle || 'PetMe - bạn có thể truy cập nhóm Facebook trực tiếp.';
             }
             return;
           }
@@ -49,7 +80,7 @@ const html = `<!doctype html>
           var ua = navigator.userAgent || navigator.vendor || window.opera;
           var isMobile = /android|iphone|ipad|ipod/i.test(ua);
 
-          if (messageEl) {
+          if (messageEl && !customTitle) {
             messageEl.textContent = 'Zobacz szczegóły tutaj.';
           }
 
