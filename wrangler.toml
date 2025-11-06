@@ -1,0 +1,8 @@
+name = "wiecej-petme-pet"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+[env.production]
+routes = [
+  { pattern = "wiecej.petme.pet/*", zone_name = "petme.pet" }
+]
