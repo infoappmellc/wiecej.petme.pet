@@ -11,31 +11,51 @@
     <meta property="og:url" content="https://wiecej.petme.pet/">
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://www.facebook.com/images/fb_icon_325x325.png">
-    <meta http-equiv="refresh" content="4;url=https://www.facebook.com/groups/1125524456415832">
     <script>
       (function () {
-        const fallbackUrl = 'https://www.facebook.com/groups/1125524456415832';
+        const fallbackUrl = 'https://m.facebook.com/groups/1125524456415832/';
         const deepLink = 'fb://group/1125524456415832';
         const userAgent = navigator.userAgent || navigator.vendor || window.opera;
         const isAndroid = /android/i.test(userAgent);
         const isIOS = /iphone|ipad|ipod/i.test(userAgent);
+        const isMobile = isAndroid || isIOS;
+        const isFacebookUA = /\bFBAN|FBAV|FB_IAB|FBDV|FBMD|FBSN|FBSV|Messenger/i.test(userAgent);
+        const referrer = document.referrer || '';
+        const isFacebookReferrer = /(^https?:\/\/)?([^\/]+\.)?facebook\.com/i.test(referrer);
+        const isFacebookPlatform = isFacebookUA || isFacebookReferrer;
+        const statusEl = document.getElementById('status');
+        const hintEl = document.getElementById('hint');
+        const buttonEl = document.getElementById('join-btn');
+        const spinnerEl = document.querySelector('.spinner');
 
-        // Chỉ thử deep link trên thiết bị di động, desktop sẽ dùng trực tiếp URL fallback.
-        if (isAndroid || isIOS) {
-          const timeout = setTimeout(function () {
+        if (isFacebookPlatform) {
+          statusEl.textContent = 'Đang mở ứng dụng Facebook...';
+          hintEl.innerHTML = 'Nếu ứng dụng không tự mở, hãy nhấn nút <strong>Tham gia nhóm</strong> bên dưới.';
+          buttonEl.classList.add('visible');
+
+          if (isMobile) {
+            const timeout = setTimeout(function () {
+              window.location.href = fallbackUrl;
+            }, 1200);
+
+            const visibilityHandler = function () {
+              if (document.hidden) {
+                clearTimeout(timeout);
+              }
+            };
+
+            document.addEventListener('visibilitychange', visibilityHandler);
+            window.location.replace(deepLink);
+          } else {
             window.location.href = fallbackUrl;
-          }, 1200);
-
-          const visibilityHandler = function () {
-            if (document.hidden) {
-              clearTimeout(timeout);
-            }
-          };
-
-          document.addEventListener('visibilitychange', visibilityHandler);
-          window.location.replace(deepLink);
+          }
         } else {
-          window.location.href = fallbackUrl;
+          if (spinnerEl) {
+            spinnerEl.setAttribute('hidden', 'hidden');
+          }
+          statusEl.textContent = 'Nhấn nút bên dưới để mở nhóm Facebook.';
+          hintEl.textContent = 'Trang chỉ tự động chuyển tiếp khi bạn đang ở trong Facebook.';
+          buttonEl.classList.add('visible');
         }
       })();
     </script>
@@ -86,13 +106,35 @@
           transform: rotate(360deg);
         }
       }
+      .cta {
+        display: none;
+        margin-top: 22px;
+        padding: 12px 20px;
+        background: #1877f2;
+        color: #ffffff;
+        border-radius: 999px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background 0.2s ease;
+      }
+      .cta:hover,
+      .cta:focus-visible {
+        background: #0f6ae0;
+      }
+      .cta.visible {
+        display: inline-block;
+      }
+      .spinner[hidden] {
+        display: none !important;
+      }
     </style>
   </head>
   <body>
     <div class="card">
       <div class="spinner" aria-hidden="true"></div>
-      <h1>Đang mở ứng dụng Facebook...</h1>
-      <p>Nếu ứng dụng không tự mở, hãy nhấn vào nút <strong>Tham gia nhóm</strong> trong 3 giây nữa.</p>
+      <h1 id="status">Đang chuẩn bị...</h1>
+      <p id="hint">Vui lòng chờ trong giây lát.</p>
+      <a id="join-btn" class="cta" href="https://m.facebook.com/groups/1125524456415832/" rel="noopener">Tham gia nhóm</a>
     </div>
   </body>
 </html>
