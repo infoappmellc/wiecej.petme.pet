@@ -15,13 +15,27 @@ export default {
     });
 
     const hasFbclid = searchParams.has('fbclid');
-    if (hasFbclid) {
-      return Response.redirect(fallbackUrl.toString(), 302);
-    }
-
     const customTitle = decodeTitle(searchParams, requestUrl.search) || DEFAULT_TITLE;
     const message = customTitle || DESCRIPTION;
-    const html = renderHtml({
+
+    if (hasFbclid) {
+      const html = renderRedirectHtml({
+        title: customTitle,
+        description: DESCRIPTION,
+        icon: ICON_DATA_URL,
+        targetUrl: fallbackUrl.toString(),
+        delayMs: 5000,
+      });
+      return new Response(html, {
+        headers: {
+          'content-type': 'text/html; charset=utf-8',
+          'cache-control': 'no-store, no-cache, must-revalidate, max-age=0',
+          'x-frame-options': 'DENY',
+        },
+      });
+    }
+
+    const html = renderWaitingHtml({
       title: customTitle,
       description: DESCRIPTION,
       icon: ICON_DATA_URL,
@@ -79,7 +93,7 @@ function escapeHtml(input) {
   });
 }
 
-function renderHtml({ title, description, icon, message }) {
+function renderWaitingHtml({ title, description, icon, message }) {
   const safeTitle = escapeHtml(title);
   const safeDescription = escapeHtml(description);
   const safeMessage = escapeHtml(message);
@@ -114,6 +128,57 @@ function renderHtml({ title, description, icon, message }) {
   </head>
   <body>
     <p>${safeMessage}</p>
+  </body>
+</html>`;
+}
+
+function renderRedirectHtml({ title, description, icon, targetUrl, delayMs }) {
+  const safeTitle = escapeHtml(title);
+  const safeDescription = escapeHtml(description);
+  const safeUrl = escapeHtml(targetUrl);
+  const seconds = Math.round(delayMs / 1000);
+
+  return `<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <title>${safeTitle}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="${safeDescription}">
+    <link rel="icon" href="${icon}">
+    <style>
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: #fff;
+        color: #111;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        text-align: center;
+        padding: 24px;
+      }
+      h1 {
+        margin-bottom: 12px;
+      }
+      p {
+        margin: 0;
+        font-size: 1rem;
+      }
+    </style>
+    <script>
+      setTimeout(function () {
+        window.location.href = ${JSON.stringify(targetUrl)};
+      }, ${delayMs});
+    </script>
+  </head>
+  <body>
+    <div>
+      <h1>Đang chuyển hướng...</h1>
+      <p>Sau ${seconds} giây bạn sẽ được đưa tới nhóm Facebook.</p>
+      <p><a href="${safeUrl}">Nhấn vào đây nếu không được chuyển tự động.</a></p>
+    </div>
   </body>
 </html>`;
 }
